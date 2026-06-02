@@ -3,6 +3,7 @@ from database import engine,SessionLocal
 from models import Note
 from schemas import Note as NoteCreate
 from fastapi import UploadFile, File
+import markdown
 
 app =FastAPI()
 
@@ -31,4 +32,10 @@ async def upload_file(file: UploadFile = File(...)):
     with open(f"uploads/{file.filename}", "wb") as f:
         f.write(content)
     return {"filename": file.filename, "content_type": file.content_type}
+@app.get("/notes/{id}/html")
+def render_notes(id:int):
+    db = SessionLocal()
+    note = db.query(Note).filter(Note.id == id).first()
+    html =markdown.markdown(note.content)
+    return {"title": note.title, "html_content": html}
 Note.metadata.create_all(bind=engine)
