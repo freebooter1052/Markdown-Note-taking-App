@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from database import engine,SessionLocal
 from models import Note
 from schemas import Note as NoteCreate
+from fastapi import UploadFile, File
 
 app =FastAPI()
 
@@ -23,5 +24,11 @@ def get_notes():
     db = SessionLocal()
     notes = db.query(Note).all()
     return {"notes": notes}
-    
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    content = await file.read()
+    with pen(f"uploads/{file.filename}", "wb") as f:
+        f.write(content)
+    return {"filename": file.filename, "content_type": file.content_type}
 Note.metadata.create_all(bind=engine)
