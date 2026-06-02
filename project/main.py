@@ -28,7 +28,7 @@ def get_notes():
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     content = await file.read()
-    with pen(f"uploads/{file.filename}", "wb") as f:
+    with open(f"uploads/{file.filename}", "wb") as f:
         f.write(content)
     return {"filename": file.filename, "content_type": file.content_type}
 Note.metadata.create_all(bind=engine)
