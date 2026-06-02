@@ -4,6 +4,11 @@ from models import Note
 from schemas import Note as NoteCreate
 from fastapi import UploadFile, File
 import markdown
+import language_tool_python
+
+tool = language_tool_python.LanguageTool(
+    'en-US'
+)
 
 app =FastAPI()
 
@@ -38,4 +43,16 @@ def render_notes(id:int):
     note = db.query(Note).filter(Note.id == id).first()
     html =markdown.markdown(note.content)
     return {"title": note.title, "html_content": html}
+@app.post("/grammar")
+def grammar(text:str):
+
+    matches = tool.check(text)
+
+    return [
+        {
+            "message": m.message,
+            "suggestions": m.replacements
+        }
+        for m in matches
+    ]
 Note.metadata.create_all(bind=engine)
